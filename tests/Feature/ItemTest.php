@@ -31,6 +31,15 @@ class ItemTest extends TestCase
         $this->assertEquals($response['key'], '122313');
     }
 
+    public function testFailKeyStoreItem()
+    {
+        $response = $this->json('POST', '/api/items', ['name' => '123456789test', 'key' => randomString(26)]);
+        $response->assertStatus(400);
+
+        $response = $this->json('POST', '/api/items', ['name' => '123456789test', 'key' => '']);
+        $response->assertStatus(400);
+    }
+
     public function testGetItems()
     {
         $this->get('/api/items')->assertStatus(200);
@@ -46,7 +55,7 @@ class ItemTest extends TestCase
     public function testUpdateItem()
     {
         $item = Item::latest()->first()->id;
-        $response = $this->json('POST', '/api/items/'  . $item, ['_method'=> 'PATCH', 'name' => 'edited', 'key' => 'edited']);
+        $response = $this->json('POST', '/api/items/'  . $item, ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => 'edited_key']);
         $response->assertStatus(200);
 
         $response = json_decode($response->content(), 1);
@@ -60,8 +69,44 @@ class ItemTest extends TestCase
         $this->assertArrayHasKey('updated_at', $response);
 
         $this->assertEquals($response['id'],$item);
-        $this->assertEquals($response['name'],'edited');
-        $this->assertEquals($response['key'], 'edited');
+        $this->assertEquals($response['name'],'edited_name');
+        $this->assertEquals($response['key'], 'edited_key');
+    }
+
+    public function testFailKeyUpdateItem()
+    {
+        $item = Item::first()->id;
+
+        $response = $this->json('POST', '/api/items/'  . $item, ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => randomString(26)]);
+        $response->assertStatus(400);
+
+        $response = $this->json('POST', '/api/items/'  . $item, ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => '']);
+        $response->assertStatus(400);
+
+        $keys = ['key'];
+        $response->assertJsonStructure($keys);
+    }
+
+    public function testFailNameUpdateItem()
+    {
+        $item = Item::first()->id;
+
+        $response = $this->json('POST', '/api/items/'  . $item, ['_method'=> 'PATCH', 'name' => randomString(256), 'key' => randomString(24)]);
+        $response->assertStatus(400);
+
+        $keys = ['name'];
+        $response->assertJsonStructure($keys);
+    }
+
+    public function testFailKeyAndNameUpdateItem()
+    {
+        $item = Item::first()->id;
+
+        $response = $this->json('POST', '/api/items/'  . $item, ['_method'=> 'PATCH', 'name' => randomString(256), 'key' => randomString(26)]);
+        $response->assertStatus(400);
+
+        $keys = ['key', 'name'];
+        $response->assertJsonStructure($keys);
     }
 
     public function testDeleteItem()

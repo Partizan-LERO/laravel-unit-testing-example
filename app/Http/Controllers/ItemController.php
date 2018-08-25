@@ -2,55 +2,61 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ItemResource;
+use App\Http\Requests\StoreItem;
 use App\Item;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-
 
 class ItemController extends Controller
 {
     public function index()
     {
-        return ItemResource::collection(Item::all());
+        $items = Item::orderBy('id', 'DESC')->get();
+        return view('item.index', compact('items'));
     }
 
-    public function store(Request $request)
+    public function show($id)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'string|max:255',
-            'key' => 'required|string|max:25',
-        ]);
-
-        if ($validator->fails()) {
-            return new JsonResponse($validator->errors(), '400');
-        }
-
-        $item = Item::create([
-            'name' => $request->name,
-            'key' => $request->key,
-        ]);
-
-        return new ItemResource($item);
+        $item = Item::find($id);
+        return view('item.show', compact('item'));
     }
 
-    public function show(Item $item)
+    public function delete($id)
     {
-        return new ItemResource($item);
+        $item = Item::destroy($id);
+        return redirect(route('index-item'));
     }
 
-    public function update(Request $request, Item $item)
+    public function create()
     {
+        return view('item.create');
+    }
+
+    public function store(StoreItem $request)
+    {
+        $validated = $request->validated();
+
+        $item = new Item();
+        $item->name = $request->input('name');
+        $item->key = $request->input('key');
+        $item->save();
+
+        return redirect(route('index-item'));
+    }
+
+    public function edit($id)
+    {
+        $item = Item::find($id);
+        return view('item.edit', compact('item'));
+    }
+
+    public function update($id, StoreItem $request)
+    {
+        $item = Item::find($id);
+
+        $validated = $request->validated();
+
         $item->update($request->only(['name', 'key']));
 
-        return new ItemResource($item);
-    }
-
-    public function destroy(Item $item)
-    {
-        $item->delete();
-
-        return response()->json(null, 204);
+        return redirect(route('index-item'));
     }
 }
