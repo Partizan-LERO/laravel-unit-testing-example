@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class RegisterControllerTest extends TestCase
 {
     use WithoutMiddleware;
+
     public function testRegister()
     {
         $response = $this->json('POST', route('register'),

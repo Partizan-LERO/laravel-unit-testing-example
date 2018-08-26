@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ebd69a345e466ba9b78e909d8565ea3f",
+    "content-hash": "688611be9ffbf6ad77972f33da340b21",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -920,6 +920,52 @@
                 "php"
             ],
             "time": "2018-07-15T17:25:16+00:00"
+        },
+        {
+            "name": "panoscape/history",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/seancheung/history.git",
+                "reference": "6811970ec9e1a28085b634b4f0de23222b570a66"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/seancheung/history/zipball/6811970ec9e1a28085b634b4f0de23222b570a66",
+                "reference": "6811970ec9e1a28085b634b4f0de23222b570a66",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^5.3",
+                "php": ">=5.6.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Panoscape\\History\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sean Cheung",
+                    "email": "theoxuanx@gmail.com"
+                }
+            ],
+            "description": "Eloquent model history tracking for Laravel",
+            "homepage": "https://github.com/seancheung/history",
+            "keywords": [
+                "eloquent",
+                "history",
+                "laravel",
+                "log",
+                "model",
+                "tracking"
+            ],
+            "time": "2018-07-19T03:57:09+00:00"
         },
         {
             "name": "paragonie/random_compat",
