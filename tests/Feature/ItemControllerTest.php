@@ -3,14 +3,27 @@
 namespace Tests\Feature;
 
 use App\Item;
+use App\User;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ItemControllerTest extends TestCase
 {
+    public function loginWithFakeUser()
+    {
+        $user = new User();
+
+        $user->id = 1;
+        $user->api_token = 'test_your_super_secret_api_token';
+
+        $this->be($user);
+    }
+
     public function testIndex()
     {
+        $this->loginWithFakeUser();
+
         $response = $this->json('GET', '/');
 
         $response->assertStatus(200);
@@ -20,6 +33,8 @@ class ItemControllerTest extends TestCase
 
     public function testShow()
     {
+        $this->loginWithFakeUser();
+
         $id = Item::first()->id;
         $response = $this->json('GET', 'item/show/' . $id);
 
@@ -30,6 +45,8 @@ class ItemControllerTest extends TestCase
 
     public function testCreate()
     {
+        $this->loginWithFakeUser();
+
         $response = $this->json('GET', 'item/create');
 
         $response->assertStatus(200);
@@ -37,6 +54,8 @@ class ItemControllerTest extends TestCase
 
     public function testEdit()
     {
+        $this->loginWithFakeUser();
+
         $id = Item::first()->id;
         $response = $this->json('GET', route('edit-item', $id));
 
@@ -47,6 +66,8 @@ class ItemControllerTest extends TestCase
 
     public function testUpdate()
     {
+        $this->loginWithFakeUser();
+
         $id = Item::first()->id;
 
         $response = $this->json('POST', route('update-item', $id), ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => 'edited_key']);
@@ -58,36 +79,34 @@ class ItemControllerTest extends TestCase
 
     public function testFailKeyUpdate()
     {
+        $this->loginWithFakeUser();
+
         $id = Item::first()->id;
+        $keys = ['key'];
 
         $response = $this->json('POST', route('update-item', $id),
-            ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => randomString(26)]);
+            ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => str_random(26)]);
 
-        $keys = ['key'];
+
+
         $response->assertJsonValidationErrors($keys);
-
         $response->assertStatus(422);
-    }
-
-    public function testEmptyKeyUpdate()
-    {
-        $id = Item::first()->id;
 
         $response = $this->json('POST', route('update-item', $id),
             ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => '']);
 
-        $keys = ['key'];
         $response->assertJsonValidationErrors($keys);
-
         $response->assertStatus(422);
     }
 
     public function testFailNameUpdate()
     {
+        $this->loginWithFakeUser();
+
         $id = Item::first()->id;
 
         $response = $this->json('POST', route('update-item', $id),
-            ['_method'=> 'PATCH', 'name' => randomString(256), 'key' => randomString(21)]);
+            ['_method'=> 'PATCH', 'name' => str_random(256), 'key' => str_random(21)]);
 
         $keys = ['name'];
         $response->assertJsonValidationErrors($keys);
@@ -97,10 +116,12 @@ class ItemControllerTest extends TestCase
 
     public function testFailNameAndKeyUpdate()
     {
+        $this->loginWithFakeUser();
+
         $id = Item::first()->id;
 
         $response = $this->json('POST', route('update-item', $id),
-            ['_method'=> 'PATCH', 'name' => randomString(256), 'key' => randomString(26)]);
+            ['_method'=> 'PATCH', 'name' => str_random(256), 'key' => str_random(26)]);
 
         $keys = ['name', 'key'];
         $response->assertJsonValidationErrors($keys);
@@ -110,6 +131,8 @@ class ItemControllerTest extends TestCase
 
     public function testStore()
     {
+        $this->loginWithFakeUser();
+
         $response = $this->json('POST', route('store-item'), ['name' => 'New Item', 'key' => 'Test secret key']);
 
         $response->assertStatus(302);
@@ -119,18 +142,16 @@ class ItemControllerTest extends TestCase
 
     public function testFailKeyStore()
     {
-        $response = $this->json('POST', route('store-item'), ['name' => 'New Item', 'key' => randomString(26)]);
+        $this->loginWithFakeUser();
+
+        $response = $this->json('POST', route('store-item'), ['name' => 'New Item', 'key' => str_random(26)]);
 
         $response->assertStatus(422);
 
         $keys = ['key'];
         $response->assertJsonValidationErrors($keys);
-    }
 
-    public function testEmptyKeyStore()
-    {
         $response = $this->json('POST', route('store-item'), ['name' => 'New Item', 'key' => '']);
-
         $response->assertStatus(422);
 
         $keys = ['key'];
@@ -139,7 +160,9 @@ class ItemControllerTest extends TestCase
 
     public function testFailNameStore()
     {
-        $response = $this->json('POST', route('store-item'), ['name' => randomString(256), 'key' => randomString(24)]);
+        $this->loginWithFakeUser();
+
+        $response = $this->json('POST', route('store-item'), ['name' => str_random(256), 'key' => str_random(24)]);
 
         $response->assertStatus(422);
 
@@ -149,7 +172,9 @@ class ItemControllerTest extends TestCase
 
     public function testFailNameAndKeyStore()
     {
-        $response = $this->json('POST', route('store-item'), ['name' => randomString(256), 'key' => randomString(26)]);
+        $this->loginWithFakeUser();
+
+        $response = $this->json('POST', route('store-item'), ['name' => str_random(256), 'key' => str_random(26)]);
 
         $response->assertStatus(422);
 
@@ -159,6 +184,8 @@ class ItemControllerTest extends TestCase
 
     public function testDelete()
     {
+        $this->loginWithFakeUser();
+
         $id = Item::first()->id;
 
         $response = $this->json('DELETE', route('delete-item', $id));
