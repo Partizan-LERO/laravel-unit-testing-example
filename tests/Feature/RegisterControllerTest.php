@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\User;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RegisterControllerTest extends TestCase
 {
+    use WithoutMiddleware;
     public function testRegister()
     {
         $response = $this->json('POST', route('register'),

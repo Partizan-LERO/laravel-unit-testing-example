@@ -6,7 +6,7 @@
         <div class="form-group row">
             <label for="name" class="col-sm-1">Name</label>
             <div class="col-sm-7">
-                <textarea class="form-control @if( $errors->has('name')) is-invalid @endif"
+                <textarea class="form-control @if( isset($errors) && $errors->has('name')) is-invalid @endif"
                           name="name"
                           id=""
                           cols="30"
@@ -16,7 +16,7 @@
 
             <div class="col-sm-3">
                 <small class="text-danger">
-                    @if( $errors->has('name'))
+                    @if( isset($errors) && $errors->has('name'))
                        {{ $errors->first('name') }}
                     @endif
                 </small>
@@ -25,11 +25,11 @@
         <div class="form-group row">
             <label for="key" class="col-sm-1">Key</label>
             <div class="col-sm-7">
-                <input type="text" required name="key" class="form-control @if( $errors->has('key')) is-invalid @endif">
+                <input type="text" required name="key" class="form-control @if( isset($errors) && $errors->has('key')) is-invalid @endif">
             </div>
             <div class="col-sm-3">
                 <small class="text-danger">
-                    @if( $errors->has('key'))
+                    @if( isset($errors) && $errors->has('key'))
                         {{ $errors->first('key') }}
                     @endif
                 </small>
