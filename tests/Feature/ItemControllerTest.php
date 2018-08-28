@@ -76,34 +76,47 @@ class ItemControllerTest extends TestCase
     {
         $this->loginWithFakeUser();
 
+        $name = str_random(10);
+        $key  = str_random(10);
+
         $id = factory(Item::class)->create()->id;
 
-        $response = $this->json('POST', route('update-item', $id), ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => 'edited_key']);
+        $response = $this->json('POST', route('update-item', $id), ['_method'=> 'PATCH', 'name' => $name, 'key' => $key]);
 
         $response->assertStatus(302);
 
         $response->assertRedirect(route('index-item'));
+
+        $this->assertDatabaseHas('items', [
+            'name' => $name,
+            'key' => $key
+        ]);
 
         Item::destroy($id);
     }
 
     public function testFailKeyUpdate()
     {
+        $name = str_random(10);
+        $key = str_random(26);
+
         $this->loginWithFakeUser();
 
         $id = factory(Item::class)->create()->id;
         $keys = ['key'];
 
         $response = $this->json('POST', route('update-item', $id),
-            ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => str_random(26)]);
+            ['_method'=> 'PATCH', 'name' => $name, 'key' => $key]);
 
-
+        $this->assertDatabaseMissing('items', ['name' => $name, 'key' => $key]);
 
         $response->assertJsonValidationErrors($keys);
         $response->assertStatus(422);
 
         $response = $this->json('POST', route('update-item', $id),
-            ['_method'=> 'PATCH', 'name' => 'edited_name', 'key' => '']);
+            ['_method'=> 'PATCH', 'name' => $name, 'key' => '']);
+
+        $this->assertDatabaseMissing('items', ['name' => $name, 'key' => '']);
 
         $response->assertJsonValidationErrors($keys);
         $response->assertStatus(422);
@@ -113,12 +126,17 @@ class ItemControllerTest extends TestCase
 
     public function testFailNameUpdate()
     {
+        $name = str_random(256);
+        $key = str_random(24);
+
         $this->loginWithFakeUser();
 
         $id = factory(Item::class)->create()->id;
 
         $response = $this->json('POST', route('update-item', $id),
-            ['_method'=> 'PATCH', 'name' => str_random(256), 'key' => str_random(21)]);
+            ['_method'=> 'PATCH', 'name' => $name, 'key' => $key]);
+
+        $this->assertDatabaseMissing('items', ['name' => $name, 'key' => $key]);
 
         $keys = ['name'];
         $response->assertJsonValidationErrors($keys);
@@ -130,17 +148,22 @@ class ItemControllerTest extends TestCase
 
     public function testFailNameAndKeyUpdate()
     {
+        $name = str_random(256);
+        $key = str_random(26);
+
         $this->loginWithFakeUser();
 
         $id = factory(Item::class)->create()->id;
 
         $response = $this->json('POST', route('update-item', $id),
-            ['_method'=> 'PATCH', 'name' => str_random(256), 'key' => str_random(26)]);
+            ['_method'=> 'PATCH', 'name' => $name, 'key' => $key]);
 
         $keys = ['name', 'key'];
         $response->assertJsonValidationErrors($keys);
 
         $response->assertStatus(422);
+
+        $this->assertDatabaseMissing('items', ['name' => $name, 'key' => $key]);
 
         Item::destroy($id);
     }
@@ -149,32 +172,48 @@ class ItemControllerTest extends TestCase
     {
         $this->loginWithFakeUser();
 
+        $name = str_random(10);
+        $key  = str_random(10);
+
         $response = $this->json('POST', route('store-item'), [
-            'name' => 'New Item',
-            'key' => 'Test secret key'
+            'name' => $name,
+            'key' => $key
+        ]);
+
+        $this->assertDatabaseHas('items', [
+            'name' => $name,
+            'key' => $key
         ]);
 
         $response->assertStatus(302);
 
         $response->assertRedirect(route('index-item'));
 
-        $item = Item::where('name', 'New Item')->first();
+        $item = Item::where('name', $name)->first();
+
         Item::destroy($item->id);
     }
 
     public function testFailKeyStore()
     {
+        $name = str_random(10);
+        $key = str_random(26);
+
         $this->loginWithFakeUser();
 
-        $response = $this->json('POST', route('store-item'), ['name' => 'New Item', 'key' => str_random(26)]);
+        $response = $this->json('POST', route('store-item'), ['name' => $name, 'key' => $key]);
+
+        $this->assertDatabaseMissing('items', ['name' => $name, 'key' => $key]);
 
         $response->assertStatus(422);
 
         $keys = ['key'];
         $response->assertJsonValidationErrors($keys);
 
-        $response = $this->json('POST', route('store-item'), ['name' => 'New Item', 'key' => '']);
+        $response = $this->json('POST', route('store-item'), ['name' => $name, 'key' => '']);
         $response->assertStatus(422);
+
+        $this->assertDatabaseMissing('items', ['name' => $name, 'key' => '']);
 
         $keys = ['key'];
         $response->assertJsonValidationErrors($keys);
@@ -182,26 +221,38 @@ class ItemControllerTest extends TestCase
 
     public function testFailNameStore()
     {
+        $name = str_random(256);
+        $key = str_random(24);
+
         $this->loginWithFakeUser();
 
-        $response = $this->json('POST', route('store-item'), ['name' => str_random(256), 'key' => str_random(24)]);
+        $response = $this->json('POST', route('store-item'), ['name' => $name, 'key' => $key]);
 
         $response->assertStatus(422);
 
         $keys = ['name'];
+
         $response->assertJsonValidationErrors($keys);
+
+        $this->assertDatabaseMissing('items', ['name' => $name, 'key' => $key]);
     }
 
     public function testFailNameAndKeyStore()
     {
+        $name = str_random(256);
+        $key = str_random(26);
+
         $this->loginWithFakeUser();
 
-        $response = $this->json('POST', route('store-item'), ['name' => str_random(256), 'key' => str_random(26)]);
+        $response = $this->json('POST', route('store-item'), ['name' => $name, 'key' => $key]);
 
         $response->assertStatus(422);
 
         $keys = ['name', 'key'];
+
         $response->assertJsonValidationErrors($keys);
+
+        $this->assertDatabaseMissing('items', ['name' => $name, 'key' => $key]);
     }
 
     public function testDelete()
@@ -215,5 +266,7 @@ class ItemControllerTest extends TestCase
         $response->assertStatus(302);
 
         $response->assertRedirect(route('index-item'));
+
+        $this->assertDatabaseMissing('items', ['id' => $id]);
     }
 }
